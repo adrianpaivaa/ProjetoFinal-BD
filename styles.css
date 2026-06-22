@@ -1,0 +1,504 @@
+/* Definição de Variáveis de Cores (Claro e Escuro) */
+:root {
+    --bg-main: #f4f6f8;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-sidebar: #111827;
+    --text-sidebar: #e5e7eb;
+    --bg-card: #ffffff;
+    --border-color: #e5e7eb;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --bg-hover-sidebar: #1f2937;
+    --bg-hover-table: #f9fafb;
+    --bg-code: #1f2937;
+    --text-code: #f3f4f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Modo Escuro - Sobrescreve as variáveis */
+body.dark-mode {
+    --bg-main: #0f172a;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --bg-sidebar: #020617;
+    --text-sidebar: #e2e8f0;
+    --bg-card: #1e293b;
+    --border-color: #334155;
+    --primary-color: #38bdf8;
+    --primary-hover: #0ea5e9;
+    --bg-hover-sidebar: #0f172a;
+    --bg-hover-table: #0f172a;
+    --bg-code: #000000;
+    --text-code: #e2e8f0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+/* Reset e Configurações Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    background-color: var(--bg-sidebar);
+    color: var(--text-sidebar);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+}
+
+.sidebar .logo {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar .logo h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.sidebar .logo p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.menu-label {
+    padding: 20px 24px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.sidebar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 12px;
+}
+
+.sidebar li {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.sidebar li:hover {
+    background-color: var(--bg-hover-sidebar);
+}
+
+.sidebar li.ativo {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+/* Área Principal */
+.content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.top-header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.top-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+/* Botão de Tema */
+.theme-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Containers / Cartões */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.card h3 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.card .numero {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Metric Cards - Visão Geral */
+.metric-card {
+    position: relative;
+    padding: 24px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.metric-card h3 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.metric-card .numero {
+    font-size: 2.5rem;
+}
+
+/* Info Card - Informações */
+.info-card {
+    margin-top: 12px;
+}
+
+.info-card h3 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    text-transform: none;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.info-card>p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.consultas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.consulta-item {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+    padding: 16px 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.consulta-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(59, 130, 246, 0.3);
+}
+
+.consulta-item strong {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.consulta-item span {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+body.dark-mode .consulta-item {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+}
+
+/* Tabelas e Código */
+.tabela-profissional {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.tabela-profissional th,
+.tabela-profissional td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.tabela-profissional th {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.tabela-profissional tbody tr:hover {
+    background-color: var(--bg-hover-table);
+}
+
+.codigo-sql {
+    background-color: var(--bg-code);
+    color: var(--text-code);
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+/* ==========================================
+   ESTILOS ESPECÍFICOS: Q5 (Violações) e Q6 (Inserts)
+   ========================================== */
+
+/* Q5: Grid e Cartões de Erro */
+.violacoes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Força exatamente 2 colunas */
+    gap: 20px;
+    width: 100%;
+    max-width: 1400px;
+    margin-top: 10px;
+}
+
+/* Cartões Retangulares e Largos */
+.card-violacao {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #dc3545;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s;
+    overflow: hidden;
+}
+
+.badge-erro {
+    display: inline-block;
+    background-color: #fee2e2;
+    color: #ef4444;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.card-violacao h3 {
+    color: var(--text-main);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.card-violacao p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* Bloco de Código Otimizado para Leitura */
+.card-violacao .codigo-sql {
+    margin: 15px 0;
+    white-space: nowrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-width: 100%;
+    max-height: 120px;
+    background-color: #111827;
+    color: #f3f4f6;
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+}
+
+.erro-mensagem {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0 !important;
+    /* Retira a margem extra do final */
+}
+
+/* Q6: Pílulas e Tabela de Amostra */
+.label-topo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #059669;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.grupo-botoes {
+    margin: 20px 0 30px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pill-container.fracas .pill-btn {
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    background-color: transparent;
+}
+
+.pill-btn {
+    padding: 8px 16px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pill-btn:hover {
+    border-color: #059669;
+}
+
+.pill-btn.ativo {
+    background-color: #ecfdf5;
+    color: #059669;
+    border-color: #059669;
+    font-weight: 600;
+}
+
+.badge-exemplo {
+    background-color: #fff7ed;
+    color: #ea580c;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    float: right;
+}
+
+.header-tabela-amostra {
+    margin-bottom: 20px;
+}
+
+.header-tabela-amostra h3 {
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.header-tabela-amostra p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Ajustes para o Modo Escuro */
+body.dark-mode .badge-erro {
+    background-color: #450a0a;
+    color: #f87171;
+}
+
+body.dark-mode .pill-btn.ativo {
+    background-color: #022c22;
+    color: #34d399;
+    border-color: #34d399;
+}
+
+body.dark-mode .label-topo {
+    color: #34d399;
+}
+
+body.dark-mode .badge-exemplo {
+    background-color: #431407;
+    color: #fb923c;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .violacoes-grid {
+        grid-template-columns: 1fr;
+    }
+}
