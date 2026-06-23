@@ -3,12 +3,8 @@ from flask_cors import CORS
 import psycopg2
 
 app = Flask(__name__)
-# Habilita o CORS para permitir requisições do frontend
 CORS(app)
 
-# ==========================================
-# Configuração da Conexão
-# ==========================================
 def get_db_connection():
     return psycopg2.connect(
         host="localhost",
@@ -18,7 +14,6 @@ def get_db_connection():
         port="5432"
     )
 
-# Função auxiliar para rodar a query e formatar os dados
 def execute_query(query, colunas):
     try:
         conn = get_db_connection()
@@ -30,12 +25,9 @@ def execute_query(query, colunas):
         for row in rows:
             linha_dict = {}
             for i, coluna in enumerate(colunas):
-                # Converte os dados se não forem nulos
                 valor = row[i]
-                if valor is not None:
-                    # Se for data ou decimal, converte para string
-                    if type(valor).__name__ in ('date', 'Decimal'):
-                        valor = str(valor)
+                if valor is not None and type(valor).__name__ in ('date', 'Decimal'):
+                    valor = str(valor)
                 linha_dict[coluna] = valor
             resultados.append(linha_dict)
             
@@ -45,10 +37,6 @@ def execute_query(query, colunas):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# ==========================================
-# Rotas das Consultas SQL
-# ==========================================
-
 @app.route('/api/q7', methods=['GET'])
 def q7_inner_join():
     query = """
@@ -57,7 +45,6 @@ def q7_inner_join():
     INNER JOIN Pedido p ON c.id_cliente = p.id_cliente
     INNER JOIN Transportadora t ON p.id_transportadora = t.id_transportadora;
     """
-    # Atualizado com as novas colunas da Transportadora
     return execute_query(query, ["nome_cliente", "id_pedido", "nome_transportadora"])
 
 @app.route('/api/q8', methods=['GET'])
@@ -68,7 +55,6 @@ def q8_left_join():
     LEFT JOIN Estoque_Armazem est ON prod.id_produto = est.id_produto
     LEFT JOIN Armazem arm ON est.id_armazem = arm.id_armazem;
     """
-    # Atualizado com as novas colunas de Estoque e Armazém
     return execute_query(query, ["nome_produto", "codigo_filial", "quantidade_disponivel"])
 
 @app.route('/api/q9', methods=['GET'])
@@ -139,10 +125,6 @@ def q14_except():
     """
     return execute_query(query, ["id_produto", "nome_produto"])
 
-# ==========================================
-# Rota Dinâmica para a Questão 6 (Visualizador)
-# ==========================================
-
 TABELAS_PERMITIDAS = [
     'cliente', 'produto', 'categoria', 'fornecedor', 'transportadora', 
     'armazem', 'pedido', 'endereco_entrega', 'imagem_produto', 
@@ -152,7 +134,6 @@ TABELAS_PERMITIDAS = [
 
 @app.route('/api/tabela/<nome_tabela>', methods=['GET'])
 def get_tabela_completa(nome_tabela):
-    # Proteção contra SQL Injection
     if nome_tabela.lower() not in TABELAS_PERMITIDAS:
         return jsonify({"erro": "Tabela não autorizada ou inexistente"}), 403
 
@@ -160,22 +141,18 @@ def get_tabela_completa(nome_tabela):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # 1. Descobre o nome das colunas dinamicamente direto do PostgreSQL
         cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{nome_tabela.lower()}' ORDER BY ordinal_position;")
         colunas = [row[0].upper() for row in cur.fetchall()]
         
-        # 2. Busca todos os dados da tabela solicitada
         query = f"SELECT * FROM {nome_tabela.lower()}"
         cur.execute(query)
         rows = cur.fetchall()
         
-        # 3. Monta a resposta
         resultados = []
         for row in rows:
             linha_dict = {}
             for i, coluna in enumerate(colunas):
                 valor = row[i]
-                # Converte datas, timestamps e decimais para string
                 if valor is not None and type(valor).__name__ in ('date', 'datetime', 'Decimal'):
                     valor = str(valor)
                 linha_dict[coluna] = valor
@@ -184,7 +161,6 @@ def get_tabela_completa(nome_tabela):
         cur.close()
         conn.close()
         
-        # Devolve para o JS os nomes das colunas + os dados reais
         return jsonify({"headers": colunas, "rows": resultados})
         
     except Exception as e:

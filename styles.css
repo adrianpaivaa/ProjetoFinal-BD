@@ -1,4 +1,4 @@
-/* Definição de Variáveis de Cores (Claro e Escuro) */
+/* CSS Variables - Light and Dark Themes */
 :root {
     --bg-main: #f4f6f8;
     --text-main: #1f2937;
@@ -17,7 +17,6 @@
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Modo Escuro - Sobrescreve as variáveis */
 body.dark-mode {
     --bg-main: #0f172a;
     --text-main: #f8fafc;
@@ -36,7 +35,6 @@ body.dark-mode {
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
-/* Reset e Configurações Globais */
 * {
     margin: 0;
     padding: 0;
@@ -162,7 +160,6 @@ body {
     color: var(--primary-color);
 }
 
-/* Containers / Cartões */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -198,7 +195,6 @@ body {
     color: var(--primary-color);
 }
 
-/* Metric Cards - Visão Geral */
 .metric-card {
     position: relative;
     padding: 24px 20px;
@@ -224,7 +220,6 @@ body {
     font-size: 2.5rem;
 }
 
-/* Info Card - Informações */
 .info-card {
     margin-top: 12px;
 }
@@ -285,7 +280,6 @@ body.dark-mode .consulta-item {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
 }
 
-/* Tabelas e Código */
 .tabela-profissional {
     width: 100%;
     border-collapse: collapse;
@@ -324,22 +318,15 @@ body.dark-mode .consulta-item {
     border: 1px solid var(--border-color);
 }
 
-/* ==========================================
-   ESTILOS ESPECÍFICOS: Q5 (Violações) e Q6 (Inserts)
-   ========================================== */
-
-/* Q5: Grid e Cartões de Erro */
 .violacoes-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* Força exatamente 2 colunas */
     gap: 20px;
     width: 100%;
     max-width: 1400px;
     margin-top: 10px;
 }
 
-/* Cartões Retangulares e Largos */
 .card-violacao {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -374,7 +361,6 @@ body.dark-mode .consulta-item {
     margin-bottom: 15px;
 }
 
-/* Bloco de Código Otimizado para Leitura */
 .card-violacao .codigo-sql {
     margin: 15px 0;
     white-space: nowrap;
@@ -396,10 +382,8 @@ body.dark-mode .consulta-item {
     color: var(--text-muted);
     font-size: 0.9rem;
     margin-bottom: 0 !important;
-    /* Retira a margem extra do final */
 }
 
-/* Q6: Pílulas e Tabela de Amostra */
 .label-topo {
     font-size: 0.75rem;
     font-weight: 700;
@@ -475,7 +459,6 @@ body.dark-mode .consulta-item {
     margin-top: 4px;
 }
 
-/* Ajustes para o Modo Escuro */
 body.dark-mode .badge-erro {
     background-color: #450a0a;
     color: #f87171;
@@ -496,7 +479,6 @@ body.dark-mode .badge-exemplo {
     color: #fb923c;
 }
 
-/* Responsividade */
 @media (max-width: 1024px) {
     .violacoes-grid {
         grid-template-columns: 1fr;

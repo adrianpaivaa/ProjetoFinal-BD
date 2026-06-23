@@ -1,6 +1,3 @@
-// ==========================================
-// Lógica do Tema (Claro / Escuro)
-// ==========================================
 const btnTheme = document.getElementById('theme-toggle');
 const iconSun = document.getElementById('icon-sun');
 const iconMoon = document.getElementById('icon-moon');
@@ -24,9 +21,6 @@ function toggleTheme() {
     }
 }
 
-// ==========================================
-// Função Auxiliar para Requisições e Tabelas
-// ==========================================
 function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
     const areaDados = document.getElementById('area-dados');
 
@@ -71,9 +65,6 @@ function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
         });
 }
 
-// ==========================================
-// Navegação do Dashboard
-// ==========================================
 function carregarConteudo(questao) {
     const itensMenu = document.querySelectorAll('#menu-lista li');
     itensMenu.forEach(item => item.classList.remove('ativo'));
@@ -83,7 +74,6 @@ function carregarConteudo(questao) {
     const subtitulo = document.getElementById('subtitulo-pagina');
     const areaDados = document.getElementById('area-dados');
 
-    // Mapeamento das queries atualizadas
     const queries = {
         q7: `SELECT c.nome_completo AS nome_cliente, p.id_pedido, t.nome_fantasia AS nome_transportadora \nFROM Cliente c\nINNER JOIN Pedido p ON c.id_cliente = p.id_cliente\nINNER JOIN Transportadora t ON p.id_transportadora = t.id_transportadora;`,
         q8: `SELECT prod.nome_produto, arm.codigo_filial, est.quantidade_disponivel \nFROM Produto prod\nLEFT JOIN Estoque_Armazem est ON prod.id_produto = est.id_produto\nLEFT JOIN Armazem arm ON est.id_armazem = arm.id_armazem;`,
@@ -279,9 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#menu-lista li.ativo').click();
 });
 
-// ==========================================
-// Lógica Exclusiva da Questão 6 (Visualizador API)
-// ==========================================
 function renderizarTabelaQ6(nomeTabela, elementoBotao) {
     const botoes = document.querySelectorAll('.pill-btn');
     botoes.forEach(btn => btn.classList.remove('ativo'));
@@ -289,7 +276,6 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
 
     const areaAmostra = document.getElementById('area-amostra-tabela');
 
-    // Mostra estado de carregamento
     areaAmostra.innerHTML = `
         <div class="header-tabela-amostra">
             <h3>${nomeTabela}</h3>
@@ -297,7 +283,6 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
         </div>
     `;
 
-    // Faz a requisição dinâmica para a nova rota do Python
     fetch(`http://localhost:5000/api/tabela/${nomeTabela.toLowerCase()}`)
         .then(response => response.json())
         .then(dados => {
@@ -306,10 +291,7 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
                 return;
             }
 
-            // Monta os cabeçalhos (TH) dinamicamente
             let htmlHeaders = dados.headers.map(h => `<th>${h}</th>`).join('');
-
-            // Monta as linhas (TR e TD) dinamicamente
             let htmlRows = dados.rows.map(row => {
                 let colunasHtml = dados.headers.map(h => {
                     let valor = row[h] !== null ? row[h] : '<span style="color:#94a3b8">NULL</span>';
@@ -318,7 +300,6 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
                 return `<tr>${colunasHtml}</tr>`;
             }).join('');
 
-            // Injeta a tabela pronta
             areaAmostra.innerHTML = `
                 <div class="header-tabela-amostra">
                     <h3>${nomeTabela}</h3>
