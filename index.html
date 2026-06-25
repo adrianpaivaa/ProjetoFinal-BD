@@ -1,69 +1,96 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard E-commerce | BD</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
 
+    <!-- Menu lateral -->
     <aside class="sidebar">
         <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="logo-icon">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
             <div>
-                <h2>Gestão BD</h2>
-                <p>Painel Administrativo</p>
+                <h2>E-Commerce BD</h2>
+                <p>Painel de Controle</p>
             </div>
         </div>
-        <nav>
+        <nav class="sidebar-nav">
             <p class="menu-label">CONSULTAS SQL</p>
             <ul id="menu-lista">
-                <li class="ativo" onclick="carregarConteudo('inicio')">Visão Geral</li>
-                <li onclick="carregarConteudo('q5')">Questão 5: Violações</li>
-                <li onclick="carregarConteudo('q6')">Questão 6: Inserts</li>
-                <li onclick="carregarConteudo('q7')">Questão 7: INNER JOIN</li>
-                <li onclick="carregarConteudo('q8')">Questão 8: LEFT JOIN</li>
-                <li onclick="carregarConteudo('q9')">Questão 9: RIGHT JOIN</li>
-                <li onclick="carregarConteudo('q10')">Questão 10: FULL JOIN</li>
-                <li onclick="carregarConteudo('q11')">Questão 11: GROUP BY</li>
-                <li onclick="carregarConteudo('q12')">Questão 12: UNION</li>
-                <li onclick="carregarConteudo('q13')">Questão 13: INTERSECT</li>
-                <li onclick="carregarConteudo('q14')">Questão 14: EXCEPT</li>
+                <li class="ativo" onclick="carregarConteudo('inicio')">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Visão Geral</span>
+                </li>
+                <li onclick="carregarConteudo('q5')">
+                    <i data-lucide="shield-alert"></i>
+                    <span>Questão 5: Violações</span>
+                </li>
+                <li onclick="carregarConteudo('q6')">
+                    <i data-lucide="database"></i>
+                    <span>Questão 6: Inserts</span>
+                </li>
+                <li onclick="carregarConteudo('q7')">
+                    <i data-lucide="git-merge"></i>
+                    <span>Questão 7: INNER JOIN</span>
+                </li>
+                <li onclick="carregarConteudo('q8')">
+                    <i data-lucide="arrow-left-right"></i>
+                    <span>Questão 8: LEFT JOIN</span>
+                </li>
+                <li onclick="carregarConteudo('q9')">
+                    <i data-lucide="arrow-left-right"></i>
+                    <span>Questão 9: RIGHT JOIN</span>
+                </li>
+                <li onclick="carregarConteudo('q10')">
+                    <i data-lucide="combine"></i>
+                    <span>Questão 10: FULL JOIN</span>
+                </li>
+                <li onclick="carregarConteudo('q11')">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Questão 11: GROUP BY</span>
+                </li>
+                <li onclick="carregarConteudo('q12')">
+                    <i data-lucide="list-plus"></i>
+                    <span>Questão 12: UNION</span>
+                </li>
+                <li onclick="carregarConteudo('q13')">
+                    <i data-lucide="squares-intersect"></i>
+                    <span>Questão 13: INTERSECT</span>
+                </li>
+                <li onclick="carregarConteudo('q14')">
+                    <i data-lucide="minus-circle"></i>
+                    <span>Questão 14: EXCEPT</span>
+                </li>
             </ul>
         </nav>
     </aside>
 
+    <!-- Conteúdo principal -->
     <main class="content">
         <header class="top-header">
             <div>
                 <h1 id="titulo-pagina">Visão Geral</h1>
                 <p id="subtitulo-pagina">Métricas e status do banco de dados.</p>
             </div>
-            
-            <button id="theme-toggle" class="theme-btn" onclick="toggleTheme()" aria-label="Alternar modo de cor">
-                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </button>
         </header>
 
         <section id="area-dados" class="data-container">
-            </section>
+        </section>
     </main>
 
     <script src="script.js"></script>
 </body>
+
 </html>

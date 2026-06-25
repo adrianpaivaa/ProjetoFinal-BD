@@ -1,26 +1,19 @@
-const btnTheme = document.getElementById('theme-toggle');
-const iconSun = document.getElementById('icon-sun');
-const iconMoon = document.getElementById('icon-moon');
-
-if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark-mode');
-    iconSun.style.display = 'none';
-    iconMoon.style.display = 'block';
+// Formata número como moeda brasileira
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 }
 
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    if (document.body.classList.contains('dark-mode')) {
-        iconSun.style.display = 'none';
-        iconMoon.style.display = 'block';
-        localStorage.setItem('theme', 'dark');
-    } else {
-        iconSun.style.display = 'block';
-        iconMoon.style.display = 'none';
-        localStorage.setItem('theme', 'light');
+// Converte data de yyyy-mm-dd pra dd/mm/yyyy
+function formatarData(dataStr) {
+    if (!dataStr) return '-';
+    const partes = dataStr.split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
     }
+    return dataStr;
 }
 
+// Busca dados da API e monta a tabela com o SQL visível
 function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
     const areaDados = document.getElementById('area-dados');
 
@@ -34,15 +27,24 @@ function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
         .then(response => response.json())
         .then(dados => {
             if (dados.erro) {
-                areaDados.innerHTML = `<div class="card"><p style="color: red;">Erro no Banco: ${dados.erro}</p></div>`;
+                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
                 return;
             }
 
+            // Monta as linhas da tabela
             let linhas = '';
             dados.forEach(item => {
                 linhas += '<tr>';
                 campos_json.forEach(campo => {
-                    let valor = item[campo] !== null ? item[campo] : '<span style="color:#94a3b8">Nenhum</span>';
+                    let valor = item[campo] !== null ? item[campo] : '<span style="color: var(--text-muted)">Nenhum</span>';
+
+                    // Formata valores monetários
+                    if (campo === 'valor_total' || campo === 'total_gasto') {
+                        if (!isNaN(parseFloat(valor))) {
+                            valor = formatarMoeda(valor);
+                        }
+                    }
+
                     linhas += `<td>${valor}</td>`;
                 });
                 linhas += '</tr>';
@@ -50,22 +52,155 @@ function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
 
             let thead = headers.map(h => `<th>${h}</th>`).join('');
 
+            // Injeta a tabela no HTML
             areaDados.innerHTML = `
                 <div class="card">
                     <div class="codigo-sql">${query_sql}</div>
-                    <table class="tabela-profissional">
-                        <thead><tr>${thead}</tr></thead>
-                        <tbody>${linhas}</tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table class="tabela-profissional">
+                            <thead><tr>${thead}</tr></thead>
+                            <tbody>${linhas}</tbody>
+                        </table>
+                    </div>
                 </div>
             `;
+            lucide.createIcons();
         })
         .catch(erro => {
-            areaDados.innerHTML = `<div class="card"><p style="color: red;">Erro ao conectar com a API: ${erro}</p></div>`;
+            areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
         });
 }
 
+// Monta o Dashboard com os dados da API
+function desenharDashboard(data) {
+    const areaDados = document.getElementById('area-dados');
+
+    // Status da conexão com o banco
+    const statusText = 'Banco de Dados Conectado';
+    const statusClass = 'connected';
+
+    // Monta a lista dos últimos pedidos
+    let transacoesHtml = '';
+    if (data.recent_orders && data.recent_orders.length > 0) {
+        data.recent_orders.forEach(order => {
+            const avatarLetra = order.nome_cliente ? order.nome_cliente.charAt(0).toUpperCase() : 'C';
+            const statusLabel = order.status_pedido ? order.status_pedido.toLowerCase() : 'pendente';
+
+            transacoesHtml += `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-avatar">${avatarLetra}</div>
+                        <div class="transaction-details">
+                            <h4>${order.nome_cliente}</h4>
+                            <p>Pedido #${order.id_pedido} • ${formatarData(order.data_pedido)}</p>
+                        </div>
+                    </div>
+                    <div class="transaction-meta">
+                        <span class="transaction-amount">${formatarMoeda(order.valor_total)}</span>
+                        <span class="status-badge ${statusLabel}">${order.status_pedido}</span>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        transacoesHtml = '<p style="color: var(--text-muted); padding: 20px; text-align: center;">Nenhum pedido recente registrado.</p>';
+    }
+
+    // Injeta os cards de métricas e a lista de pedidos
+    areaDados.innerHTML = `
+        <div class="dashboard-grid">
+            <div class="card metric-card">
+                <div class="metric-icon-wrapper">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+                <div class="metric-card-content">
+                    <h3>Faturamento</h3>
+                    <p class="numero">${formatarMoeda(data.faturamento)}</p>
+                </div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-icon-wrapper">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="metric-card-content">
+                    <h3>Clientes</h3>
+                    <p class="numero">${data.clientes}</p>
+                </div>
+            </div>
+
+            <div class="card metric-card">
+                <div class="metric-icon-wrapper">
+                    <i data-lucide="shopping-bag"></i>
+                </div>
+                <div class="metric-card-content">
+                    <h3>Pedidos</h3>
+                    <p class="numero">${data.pedidos}</p>
+                </div>
+            </div>
+
+            <div class="card metric-card">
+                <div class="metric-icon-wrapper">
+                    <i data-lucide="package"></i>
+                </div>
+                <div class="metric-card-content">
+                    <h3>Produtos</h3>
+                    <p class="numero">${data.produtos}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overview-grid">
+            <!-- Últimos Pedidos -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 style="font-size:1.05rem; text-transform:none; letter-spacing:0; color:var(--text-main); font-weight:700;">
+                        Últimos Pedidos
+                    </h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Atualização em tempo real</span>
+                </div>
+                <div class="transactions-list">
+                    ${transacoesHtml}
+                </div>
+            </div>
+
+            <!-- Status do Banco e métricas auxiliares -->
+            <div class="card connection-card">
+                <h3 style="font-size:1.05rem; text-transform:none; letter-spacing:0; color:var(--text-main); font-weight:700; margin-bottom:4px;">
+                    Conexão & Auxiliares
+                </h3>
+                <div class="connection-status">
+                    <div class="status-dot ${statusClass}"></div>
+                    <span>${statusText}</span>
+                </div>
+
+                <div class="connection-stats-list">
+                    <div class="connection-stat-row">
+                        <span>Ticket Médio</span>
+                        <span>${formatarMoeda(data.ticket_medio)}</span>
+                    </div>
+                    <div class="connection-stat-row">
+                        <span>Armazéns ativos</span>
+                        <span>${data.armazens}</span>
+                    </div>
+                    <div class="connection-stat-row">
+                        <span>Transportadoras</span>
+                        <span>${data.transportadoras}</span>
+                    </div>
+                    <div class="connection-stat-row">
+                        <span>Fornecedores</span>
+                        <span>${data.fornecedores}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    lucide.createIcons();
+}
+
+// Carrega o conteúdo da página conforme o item clicado no menu
 function carregarConteudo(questao) {
+    // Marca o item ativo no menu lateral
     const itensMenu = document.querySelectorAll('#menu-lista li');
     itensMenu.forEach(item => item.classList.remove('ativo'));
     event.currentTarget.classList.add('ativo');
@@ -74,6 +209,7 @@ function carregarConteudo(questao) {
     const subtitulo = document.getElementById('subtitulo-pagina');
     const areaDados = document.getElementById('area-dados');
 
+    // Queries SQL exibidas na tela pra cada questão
     const queries = {
         q7: `SELECT c.nome_completo AS nome_cliente, p.id_pedido, t.nome_fantasia AS nome_transportadora \nFROM Cliente c\nINNER JOIN Pedido p ON c.id_cliente = p.id_cliente\nINNER JOIN Transportadora t ON p.id_transportadora = t.id_transportadora;`,
         q8: `SELECT prod.nome_produto, arm.codigo_filial, est.quantidade_disponivel \nFROM Produto prod\nLEFT JOIN Estoque_Armazem est ON prod.id_produto = est.id_produto\nLEFT JOIN Armazem arm ON est.id_armazem = arm.id_armazem;`,
@@ -85,112 +221,83 @@ function carregarConteudo(questao) {
         q14: `SELECT id_produto, nome_produto \nFROM Produto\nEXCEPT\nSELECT p.id_produto, p.nome_produto \nFROM Produto p\nINNER JOIN Item_Pedido ip ON p.id_produto = ip.id_produto;`
     };
 
+    // Visão Geral — puxa estatísticas do Flask
     if (questao === 'inicio') {
         titulo.innerText = "Visão Geral";
-        subtitulo.innerText = "Dashboard com métricas principais do banco de dados.";
+        subtitulo.innerText = "Métricas e status do banco de dados.";
+
         areaDados.innerHTML = `
-            <div class="dashboard-grid">
-                <div class="card metric-card">
-                    <div class="metric-icon">👥</div>
-                    <h3>Clientes</h3>
-                    <p class="numero">11</p>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-icon">📦</div>
-                    <h3>Produtos</h3>
-                    <p class="numero">15</p>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-icon">📋</div>
-                    <h3>Pedidos</h3>
-                    <p class="numero">10</p>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-icon">🏪</div>
-                    <h3>Armazéns</h3>
-                    <p class="numero">3</p>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-icon">🚚</div>
-                    <h3>Transportadoras</h3>
-                    <p class="numero">4</p>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-icon">🏢</div>
-                    <h3>Fornecedores</h3>
-                    <p class="numero">5</p>
-                </div>
-            </div>
-            <div class="card info-card">
-                <h3>Como Usar</h3>
-                <p>Navegue pelas <strong>Consultas SQL</strong> no menu lateral para visualizar queries relacionadas a diferentes operações de banco de dados. Cada seção contém o script SQL e seus respectivos resultados em tempo real.</p>
-                <div class="consultas-grid">
-                    <div class="consulta-item">
-                        <strong>Q7 - Q10</strong>
-                        <span>Operações de JOIN</span>
-                    </div>
-                    <div class="consulta-item">
-                        <strong>Q11 - Q14</strong>
-                        <span>Agregação e Set Operations</span>
-                    </div>
-                    <div class="consulta-item">
-                        <strong>Q5 - Q6</strong>
-                        <span>Integridade e Visualização</span>
-                    </div>
-                </div>
+            <div class="card">
+                <p>Carregando métricas e histórico de transações...</p>
             </div>
         `;
+
+        fetch('http://localhost:5000/api/dashboard_stats')
+            .then(response => {
+                if (!response.ok) throw new Error("Erro de conexão");
+                return response.json();
+            })
+            .then(data => {
+                if (data.erro || data.error) throw new Error("Erro no banco");
+                desenharDashboard(data);
+            })
+            .catch(erro => {
+                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
+            });
     }
+    // Questão 5 — violações de restrições (conteúdo estático)
     else if (questao === 'q5') {
-        document.getElementById('titulo-pagina').innerHTML = '<div class="label-topo">INTEGRIDADE DO BANCO</div>Erros esperados e Comportamentos';
+        titulo.innerHTML = '<div class="label-topo">INTEGRIDADE DO BANCO</div>Erros esperados e Comportamentos';
         subtitulo.innerText = "Exemplos de violações de restrições e demonstração de valores padrão.";
 
         areaDados.innerHTML = `
             <div class="violacoes-grid">
                 <div class="card-violacao">
                     <div>
-                        <span class="badge-erro">1. Erro esperado</span>
+                        <span class="badge-erro"><i data-lucide="x-circle" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 1. Erro esperado</span>
                         <h3>CHECK simples</h3>
                         <p>Preço base precisa ser maior que zero.</p>
                     </div>
                     <div class="codigo-sql">INSERT INTO Produto (nome_produto, descricao, preco_base, peso_gramas) VALUES ('Teclado', 'Teclado Mecânico', -50.00, 800);</div>
-                    <p class="erro-mensagem">Falha na restrição de verificação: o banco impede preço negativo.</p>
+                    <p class="erro-mensagem"><i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> Falha na restrição de verificação: o banco impede preço negativo.</p>
                 </div>
                 
-                <div class="card-violacao" style="border-left-color: #10b981;">
+                <div class="card-violacao sucesso-esperado">
                     <div>
-                        <span class="badge-erro" style="background-color: #d1fae5; color: #059669;">2. Sucesso esperado</span>
-                        <h3>Demonstração da Restrição DEFAULT</h3>
+                        <span class="badge-erro"><i data-lucide="check-circle" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 2. Sucesso esperado</span>
+                        <h3>Restrição DEFAULT</h3>
                         <p>A palavra-chave DEFAULT aciona o valor padrão definido na tabela.</p>
                     </div>
                     <div class="codigo-sql">INSERT INTO Produto (nome_produto, descricao, preco_base, peso_gramas, status_venda)<br>VALUES ('Mousepad Básico', 'Mousepad em tecido', 15.00, 100, DEFAULT);</div>
-                    <p class="erro-mensagem"> O campo 'status_venda' receberá 'Ativo'.</p>
+                    <p class="erro-mensagem"><i data-lucide="check" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> O campo 'status_venda' receberá 'Ativo'.</p>
                 </div>
 
                 <div class="card-violacao">
                     <div>
-                        <span class="badge-erro">3. Erro esperado</span>
+                        <span class="badge-erro"><i data-lucide="x-circle" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 3. Erro esperado</span>
                         <h3>CHECK com lista permitida</h3>
                         <p>O status do pedido precisa estar no conjunto permitido.</p>
                     </div>
                     <div class="codigo-sql">INSERT INTO Pedido (id_cliente, data_pedido, valor_total, status_pedido) VALUES (1, '2026-06-25', 150.00, 'Cancelado');</div>
-                    <p class="erro-mensagem">Falha na restrição de verificação: 'Cancelado' não é um status permitido.</p>
+                    <p class="erro-mensagem"><i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> Falha na restrição de verificação: 'Cancelado' não é um status permitido.</p>
                 </div>
 
                 <div class="card-violacao">
                     <div>
-                        <span class="badge-erro">4. Erro esperado</span>
+                        <span class="badge-erro"><i data-lucide="x-circle" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 4. Erro esperado</span>
                         <h3>UNIQUE em CPF</h3>
                         <p>Dois clientes não podem compartilhar o mesmo CPF.</p>
                     </div>
                     <div class="codigo-sql">INSERT INTO Cliente (nome_completo, cpf, email, telefone) VALUES ('Maria Souza', '12345678901'...<br>INSERT INTO Cliente (nome_completo, cpf, email, telefone) VALUES ('Pedro Paulo', '12345678901'...</div>
-                    <p class="erro-mensagem">Violação de chave única: CPF duplicado.</p>
+                    <p class="erro-mensagem"><i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> Violação de chave única: CPF duplicado.</p>
                 </div>
             </div>
         `;
+        lucide.createIcons();
     }
+    // Questão 6 — visualizador de tabelas populadas
     else if (questao === 'q6') {
-        document.getElementById('titulo-pagina').innerHTML = '<div class="label-topo">TABELAS POPULADAS</div>Visualizador de inserts';
+        titulo.innerHTML = '<div class="label-topo">TABELAS POPULADAS</div>Visualizador de inserts';
         subtitulo.innerText = "As amostras abaixo resumem o conteúdo inserido nas tabelas do banco.";
 
         areaDados.innerHTML = `
@@ -217,12 +324,15 @@ function carregarConteudo(questao) {
                 </div>
             </div>
             
-            <div class="card" id="area-amostra-tabela" style="overflow-x: auto;">
+            <div class="card">
+                <div id="area-amostra-tabela" class="table-wrapper">
+                </div>
             </div>
         `;
 
         renderizarTabelaQ6('Cliente', document.querySelector('.pill-btn.ativo'));
     }
+    // Questões 7 a 14 — busca os dados e monta a tabela
     else if (questao === 'q7') {
         titulo.innerText = "Questão 7: INNER JOIN";
         subtitulo.innerText = "Clientes, Pedidos e Transportadoras associadas.";
@@ -265,10 +375,13 @@ function carregarConteudo(questao) {
     }
 }
 
+// Inicializa os ícones e carrega a tela inicial
 document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
     document.querySelector('#menu-lista li.ativo').click();
 });
 
+// Puxa os dados de uma tabela específica e monta a amostra (Q6)
 function renderizarTabelaQ6(nomeTabela, elementoBotao) {
     const botoes = document.querySelectorAll('.pill-btn');
     botoes.forEach(btn => btn.classList.remove('ativo'));
@@ -287,14 +400,22 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
         .then(response => response.json())
         .then(dados => {
             if (dados.erro) {
-                areaAmostra.innerHTML += `<p style="color: red; padding: 20px;">Erro: ${dados.erro}</p>`;
+                areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">erro ao conectar a api</p>`;
                 return;
             }
 
             let htmlHeaders = dados.headers.map(h => `<th>${h}</th>`).join('');
             let htmlRows = dados.rows.map(row => {
                 let colunasHtml = dados.headers.map(h => {
-                    let valor = row[h] !== null ? row[h] : '<span style="color:#94a3b8">NULL</span>';
+                    let valor = row[h] !== null ? row[h] : '<span style="color: var(--text-muted)">NULL</span>';
+
+                    // Formata colunas monetárias
+                    if (h === 'PRECO_BASE' || h === 'VALOR_TOTAL' || h === 'VALOR_PARCELA' || h === 'TAXA_BASE_FRETE') {
+                        if (!isNaN(parseFloat(valor))) {
+                            valor = formatarMoeda(valor);
+                        }
+                    }
+
                     return `<td>${valor}</td>`;
                 }).join('');
                 return `<tr>${colunasHtml}</tr>`;
@@ -302,8 +423,10 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
 
             areaAmostra.innerHTML = `
                 <div class="header-tabela-amostra">
-                    <h3>${nomeTabela}</h3>
-                    <p>Total de registros encontrados: ${dados.rows.length}</p>
+                    <div>
+                        <h3>Amostra: ${nomeTabela}</h3>
+                        <p>Total de registros encontrados: <strong>${dados.rows.length}</strong></p>
+                    </div>
                 </div>
                 <table class="tabela-profissional" style="min-width: 600px;">
                     <thead>
@@ -314,8 +437,9 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
                     </tbody>
                 </table>
             `;
+            lucide.createIcons();
         })
         .catch(erro => {
-            areaAmostra.innerHTML += `<p style="color: red; padding: 20px;">Erro na comunicação com a API: ${erro}</p>`;
+            areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">erro ao conectar a api</p>`;
         });
 }
