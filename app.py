@@ -3,9 +3,9 @@ from flask_cors import CORS
 import psycopg2
 
 app = Flask(__name__)
-CORS(app) # Permite o frontend acessar a API
+CORS(app)
 
-# Faz a conexão com o PostgreSQL
+# Conexão com o PostgreSQL
 def get_db_connection():
     return psycopg2.connect(
         host="localhost",
@@ -15,21 +15,20 @@ def get_db_connection():
         port="5432"
     )
 
-# Executa uma query e retorna o resultado como JSON
+# Executar uma query e retorna o resultado como JSON
 def execute_query(query, colunas):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(query) # Roda a query no banco
-        rows = cur.fetchall() # Puxa todas as linhas do resultado
+        cur.execute(query)
+        rows = cur.fetchall()
         
-        # Converte cada linha em um dicionário {coluna: valor}
         resultados = []
         for row in rows:
             linha_dict = {}
             for i, coluna in enumerate(colunas):
                 valor = row[i]
-                # Converte date e Decimal pra string (JSON não aceita esses tipos)
+                # Converter date e Decimal pra string
                 if valor is not None and type(valor).__name__ in ('date', 'Decimal'):
                     valor = str(valor)
                 linha_dict[coluna] = valor
@@ -37,7 +36,7 @@ def execute_query(query, colunas):
             
         cur.close()
         conn.close()
-        return jsonify(resultados) # Retorna os dados como JSON pro frontend
+        return jsonify(resultados) # Retornar os dados como JSON pro frontend
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
@@ -52,7 +51,7 @@ def q7_inner_join():
     """
     return execute_query(query, ["nome_cliente", "id_pedido", "nome_transportadora"])
 
-# Questão 8 — LEFT JOIN: traz todos os produtos, mesmo sem estoque
+# Questão 8 — LEFT JOIN: mostra todos os produtos, mesmo os sem estoque
 @app.route('/api/q8', methods=['GET'])
 def q8_left_join():
     query = """
@@ -63,7 +62,7 @@ def q8_left_join():
     """
     return execute_query(query, ["nome_produto", "codigo_filial", "quantidade_disponivel"])
 
-# Questão 9 — RIGHT JOIN: traz todos os clientes, mesmo sem pedido
+# Questão 9 — RIGHT JOIN: mostra todos os clientes, mesmo sem pedido
 @app.route('/api/q9', methods=['GET'])
 def q9_right_join():
     query = """
@@ -73,7 +72,7 @@ def q9_right_join():
     """
     return execute_query(query, ["nome_completo", "id_pedido", "valor_total"])
 
-# Questão 10 — FULL JOIN: mostra fornecedores e produtos, incluindo órfãos
+# Questão 10 — FULL JOIN: mostra fornecedores e produtos, incluindo todos
 @app.route('/api/q10', methods=['GET'])
 def q10_full_join():
     query = """
@@ -84,7 +83,7 @@ def q10_full_join():
     """
     return execute_query(query, ["razao_social", "nome_produto"])
 
-# Questão 11 — GROUP BY + HAVING: soma gastos por cliente, filtra > R$500
+# Questão 11 — GROUP BY + HAVING: soma gastos por cliente, e filtra os maiores que R$500
 @app.route('/api/q11', methods=['GET'])
 def q11_group_by():
     query = """
@@ -137,20 +136,9 @@ def q14_except():
     """
     return execute_query(query, ["id_produto", "nome_produto"])
 
-# Tabelas que o frontend pode consultar (proteção contra SQL injection)
-TABELAS_PERMITIDAS = [
-    'cliente', 'produto', 'categoria', 'fornecedor', 'transportadora', 
-    'armazem', 'pedido', 'endereco_entrega', 'imagem_produto', 
-    'atualizacao_rastreio', 'fatura_pagamento', 'cartao_salvo', 
-    'item_pedido', 'produto_categoria', 'fornecimento', 'estoque_armazem'
-]
-
-# Rota genérica — puxa todos os dados de uma tabela pelo nome
+# Rota pra puxar todos os dados de uma tabela pela url
 @app.route('/api/tabela/<nome_tabela>', methods=['GET'])
 def get_tabela_completa(nome_tabela):
-    if nome_tabela.lower() not in TABELAS_PERMITIDAS:
-        return jsonify({"erro": "Tabela não autorizada ou inexistente"}), 403
-
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -163,7 +151,6 @@ def get_tabela_completa(nome_tabela):
         cur.execute(f"SELECT * FROM {nome_tabela.lower()}")
         rows = cur.fetchall()
         
-        # Converte cada linha em dicionário
         resultados = []
         for row in rows:
             linha_dict = {}
@@ -182,14 +169,14 @@ def get_tabela_completa(nome_tabela):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# Rota do Dashboard — calcula as métricas da visão geral
+# Rotas do Dashboard
 @app.route('/api/dashboard_stats', methods=['GET'])
 def get_dashboard_stats():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Conta o total de registros em cada tabela
+        # Contar os registros em cada tabela
         cur.execute("SELECT COUNT(*) FROM Cliente")
         clientes = cur.fetchone()[0]
         
@@ -208,15 +195,15 @@ def get_dashboard_stats():
         cur.execute("SELECT COUNT(*) FROM Fornecedor")
         fornecedores = cur.fetchone()[0]
         
-        # Calcula o faturamento: SUM(valor_total) da tabela Pedido
+        # Calcula o faturamento
         cur.execute("SELECT COALESCE(SUM(valor_total), 0) FROM Pedido")
         faturamento = float(cur.fetchone()[0])
         
-        # Calcula o ticket médio: AVG(valor_total) da tabela Pedido
+        # Calcula o ticket médio
         cur.execute("SELECT COALESCE(AVG(valor_total), 0) FROM Pedido")
         ticket_medio = float(cur.fetchone()[0])
         
-        # Puxa os 5 pedidos mais recentes pra lista de transações
+        # Puxa os 5 pedidos mais recentes
         cur.execute("""
             SELECT p.id_pedido, c.nome_completo, p.data_pedido, p.valor_total, p.status_pedido
             FROM Pedido p
@@ -254,6 +241,5 @@ def get_dashboard_stats():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# Inicia o servidor Flask na porta 5000
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

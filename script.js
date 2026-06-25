@@ -1,9 +1,9 @@
-// Formata número como moeda brasileira
+// Formata pra moeda brasileira
 function formatarMoeda(valor) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 }
 
-// Converte data de yyyy-mm-dd pra dd/mm/yyyy
+// Converte data
 function formatarData(dataStr) {
     if (!dataStr) return '-';
     const partes = dataStr.split('-');
@@ -13,7 +13,7 @@ function formatarData(dataStr) {
     return dataStr;
 }
 
-// Busca dados da API e monta a tabela com o SQL visível
+// Busca dados da API e monta a tabela
 function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
     const areaDados = document.getElementById('area-dados');
 
@@ -27,7 +27,7 @@ function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
         .then(response => response.json())
         .then(dados => {
             if (dados.erro) {
-                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
+                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">Erro ao conectar a API.</p></div>`;
                 return;
             }
 
@@ -67,7 +67,7 @@ function buscarEDesenharTabela(url, query_sql, headers, campos_json) {
             lucide.createIcons();
         })
         .catch(erro => {
-            areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
+            areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">Erro ao conectar a API.</p></div>`;
         });
 }
 
@@ -200,7 +200,6 @@ function desenharDashboard(data) {
 
 // Carrega o conteúdo da página conforme o item clicado no menu
 function carregarConteudo(questao) {
-    // Marca o item ativo no menu lateral
     const itensMenu = document.querySelectorAll('#menu-lista li');
     itensMenu.forEach(item => item.classList.remove('ativo'));
     event.currentTarget.classList.add('ativo');
@@ -221,7 +220,7 @@ function carregarConteudo(questao) {
         q14: `SELECT id_produto, nome_produto \nFROM Produto\nEXCEPT\nSELECT p.id_produto, p.nome_produto \nFROM Produto p\nINNER JOIN Item_Pedido ip ON p.id_produto = ip.id_produto;`
     };
 
-    // Visão Geral — puxa estatísticas do Flask
+    // puxa dados do Flask
     if (questao === 'inicio') {
         titulo.innerText = "Visão Geral";
         subtitulo.innerText = "Métricas e status do banco de dados.";
@@ -242,7 +241,7 @@ function carregarConteudo(questao) {
                 desenharDashboard(data);
             })
             .catch(erro => {
-                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">erro ao conectar a api</p></div>`;
+                areaDados.innerHTML = `<div class="card"><p style="color: var(--danger);">Erro ao conectar a API.</p></div>`;
             });
     }
     // Questão 5 — violações de restrições (conteúdo estático)
@@ -375,13 +374,11 @@ function carregarConteudo(questao) {
     }
 }
 
-// Inicializa os ícones e carrega a tela inicial
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     document.querySelector('#menu-lista li.ativo').click();
 });
 
-// Puxa os dados de uma tabela específica e monta a amostra (Q6)
 function renderizarTabelaQ6(nomeTabela, elementoBotao) {
     const botoes = document.querySelectorAll('.pill-btn');
     botoes.forEach(btn => btn.classList.remove('ativo'));
@@ -400,7 +397,7 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
         .then(response => response.json())
         .then(dados => {
             if (dados.erro) {
-                areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">erro ao conectar a api</p>`;
+                areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">Erro ao conectar a API.</p>`;
                 return;
             }
 
@@ -409,7 +406,6 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
                 let colunasHtml = dados.headers.map(h => {
                     let valor = row[h] !== null ? row[h] : '<span style="color: var(--text-muted)">NULL</span>';
 
-                    // Formata colunas monetárias
                     if (h === 'PRECO_BASE' || h === 'VALOR_TOTAL' || h === 'VALOR_PARCELA' || h === 'TAXA_BASE_FRETE') {
                         if (!isNaN(parseFloat(valor))) {
                             valor = formatarMoeda(valor);
@@ -440,6 +436,6 @@ function renderizarTabelaQ6(nomeTabela, elementoBotao) {
             lucide.createIcons();
         })
         .catch(erro => {
-            areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">erro ao conectar a api</p>`;
+            areaAmostra.innerHTML = `<p style="color: var(--danger); padding: 20px;">Erro ao conectar a API.</p>`;
         });
 }
