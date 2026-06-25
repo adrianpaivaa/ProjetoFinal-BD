@@ -13,12 +13,11 @@ Antes de começar, certifique-se de ter instalado em sua máquina:
 ## 🚀 Como rodar o projeto
 
 ### Passo 1: Configurar o Banco de Dados
-1. Abra o seu gerenciador do PostgreSQL (pgAdmin, DBeaver, ou psql).
+1. Abra o seu gerenciador do PostgreSQL.
 2. Crie um novo banco de dados vazio chamado `ProjetoFinal`.
 3. Abra uma janela de query neste novo banco e execute o script SQL completo fornecido pelo grupo (que cria as tabelas e insere os dados iniciais).
 
 ### Passo 2: Configurar o Backend (API Python)
-A API é responsável por fazer a ponte de comunicação segura entre o site e o PostgreSQL.
 
 1. Abra o terminal na pasta onde está o arquivo `app.py`.
 2. Instale as bibliotecas necessárias rodando o comando:
@@ -43,8 +42,7 @@ A API é responsável por fazer a ponte de comunicação segura entre o site e o
 ### Passo 3: Abrir o Site (Frontend)
 Com o banco populado e a API rodando, o site já pode buscar os dados.
 
-1. Vá até a pasta do projeto e dê um clique duplo no arquivo `index.html` para abri-lo no seu navegador.
-2. (Opcional) Se você usa o VS Code, pode clicar com o botão direito no `index.html` e selecionar **"Open with Live Server"**.
+Vá até a pasta do projeto e dê um clique duplo no arquivo `index.html` para abri-lo no seu navegador.
 
 Pronto! Navegue pelo menu lateral para visualizar os dados de todas as 15 tabelas, ver os testes de integridade e os resultados das junções (JOINs, GROUP BY, UNION, etc.).
 
